@@ -3,7 +3,7 @@ node 'puppetmaster' {
   include role::master_server
   file {'/root/README':
     ensure => file,
-    content => “basic test ${fqdn}”,
+    content => "basic test ${fqdn}",
   }
 }
 node /^db/ {
