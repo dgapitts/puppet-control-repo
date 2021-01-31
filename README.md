@@ -11,8 +11,63 @@ This git repo is for my puppet training purposing:
   mkdir /etc/puppetlabs/r10k
   cat /vagrant/r10k.yaml > /etc/puppetlabs/r10k/r10k.yaml
 ```
-* v0.01 of this puppet-control-repo covers project covers initial setup (details below)
-* v0.02 will include hard coding the puppetmaster public ssh-key (to be completed)
+* v0.01 of this puppet-control-repo covers project covers initial setup - see details below)
+* v0.02 includes hard coding my current puppetmaster public ssh-key into ssh_server role manifests (which is part of the base profle) - again see details below
+
+## v0.02  add ssh key (hard coding) my current puppetmaster public ssh-key into ssh_server role manifest
+
+On puppetmaster run ssh-keygen (with no passphrase)
+```
+[puppetmaster:root:~] # ssh-keygen 
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): 
+Created directory '/root/.ssh'.
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+...
+[puppetmaster:root:~] # cat .ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDEG0tZUQwPDpOVEgMR+RXoxE5lhjaGVEdHUtsdD5Or70I4C/edvXpPqauKEOAzLjNleTuJmnG+Ozq8bOaSE9NFd758CYqM2swVMfNqvFmilQlg8/yaKF3EzuGdXK5gx6mo/XizkuliCTtX5RxNgmVEIcYzOg/1zx8XSsBiWyHNPax9JX2s00DM4dc1UOssTiwchFjOprhg1cQQETsGnQaLoZHZneWtZYMKZBXjo5BntyIK8KybJLvOyKIXnKYbQ1nO57WbC2U2BXHNjKrts/DXkyW0rK6ljxD3eK04lSkeGT5A5g3/a92LwhesQJDMsi4IUNwNNXO1Onr2hdkJtoiJ root@puppetmaster
+```
+
+this is public key is added to the ssh_server role manifests
+
+```
+[~/projects/puppet-control-repo] # git diff site/profile/manifests/ssh_server.pp
+diff --git a/site/profile/manifests/ssh_server.pp b/site/profile/manifests/ssh_server.pp
+index 532866a..e3fc627 100755
+--- a/site/profile/manifests/ssh_server.pp
++++ b/site/profile/manifests/ssh_server.pp
+@@ -10,6 +10,6 @@ class profile::ssh_server {
+     ensure => present,
+     user   => 'root',
+     type   => 'ssh-rsa',
+-    key    => '',
++    key    => 'AAAAB3NzaC1yc2EAAAADAQABAAABAQDEG0tZUQwPDpOVEgMR+RXoxE5lhjaGVEdHUtsdD5Or70I4C/edvXpPqauKEOAzLjNleTuJmnG+Ozq8bOaSE9NFd758CYqM2swVMfNqvFmilQlg8/yaKF3EzuGdXK5gx6mo/XizkuliCTtX5RxNgmVEIcYzOg/1zx8XSsBiWyHNPax9JX2s00DM4dc1UOssTiwchFjOprhg1cQQETsGnQaLoZHZneWtZYMKZBXjo5BntyIK8KybJLvOyKIXnKYbQ1nO57WbC2U2BXHNjKrts/DXkyW0rK6ljxD3eK04lSkeGT5A5g3/a92LwhesQJDMsi4IUNwNNXO1Onr2hdkJtoiJ',
+   }  
+ }
+
+```
+
+and this is linked to the base profile manifest
+
+```
+[~/projects/puppet-control-repo] # git diff site/profile/manifests/base.pp
+diff --git a/site/profile/manifests/base.pp b/site/profile/manifests/base.pp
+index 1243cf8..08a5da6 100755
+--- a/site/profile/manifests/base.pp
++++ b/site/profile/manifests/base.pp
+@@ -2,4 +2,5 @@ class profile::base {
+   user {'admin':
+     ensure => present
+   }
++  include profile::ssh_server
+ }
+```
+
+
+
 
 ## v0.01  initial setup
 
